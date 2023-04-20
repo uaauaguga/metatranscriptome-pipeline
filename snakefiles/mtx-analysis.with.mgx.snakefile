@@ -15,8 +15,9 @@ outdir = config["outdir"]
 def get_output(wildcards):
     bam = expand("{outdir}/bam/paired-contigs/{sample_id}.bam",sample_id=sample_ids,outdir=outdir)
     tx = expand('{outdir}/stringtie.30/paired-contigs/bed.annotated/{sample_id}.bed',sample_id=sample_ids,outdir=outdir)
+    tx_igr = expand('{outdir}/stringtie.30/paired-contigs/igr.with.tx/{sample_id}.bed',sample_id=sample_ids,outdir=outdir)
     bw = expand('{outdir}/coverage/paired-contigs/{sample_id}.bigwig',sample_id=sample_ids,outdir=outdir)
-    return bam + tx + bw #+ count
+    return bam + tx + bw + tx_igr
 
 rule all:
     input:
@@ -104,6 +105,19 @@ rule annotate_transcripts:
         """
         scripts/annotate-intervals.py --gene {input.gene_bed} --bed {input.tx_bed} --output {output.bed} --contig {input.faidx}
         """
+
+rule get_orphan_transcripts_containing_igrs:
+    input:
+        bed = '{outdir}/stringtie.30/paired-contigs/bed.annotated/{sample_id}.bed'
+    output:
+        bed = '{outdir}/stringtie.30/paired-contigs/igr.with.tx/{sample_id}.bed'
+    params:
+        min_distance = 16
+    shell:
+        """
+        scripts/extract-orphan-tx-by-igr.py  -i {input.bed} -o {output.bed} --min-distance {params.min_distance}
+        """
+
     
 rule get_coverage:
     input:

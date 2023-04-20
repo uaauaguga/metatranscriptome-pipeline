@@ -1,0 +1,5 @@
+Building DAG of jobs...
+InputFunctionException in line 22 of /apps/home/lulab_jinyunfan/qhsky1/metatranscriptome-pipeline/snakefiles/mtx-analysis.with.mgx.snakefile:
+TypeError: can only concatenate list (not "tuple") to list
+Wildcards:
+

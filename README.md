@@ -5,8 +5,8 @@
 
 ## Preprocess MGX reads
 
-- Trim adaptor, run fastqc
-- Remove unwanted sequence (optional)
+- Trim adaptor with trimgalore 
+- Remove unwanted sequence, eg. host sequence like human genome for gut metagenome data (optional)
 - Run metaphlan for taxonomy profiling
 
 ```bash
@@ -19,7 +19,7 @@ snakemake --snakefile snakefiles/preprocessing.snakefile --configfile config/pre
 
 ## Preprocess MTX reads
 
-- Trim adaptor, run fastqc
+- Trim adaptor
 - Remove unwanted sequence (optional)
 - Run metaphlan for taxonomy profiling
 - Infer strandness of the RNA library based on marker gene mapping result
@@ -62,5 +62,10 @@ snakemake --snakefile snakefiles/mtx-analysis.with.mgx.snakefile --configfile co
 ```
 
 
+## Downstream analysis
 
-
+- Get transcripts at intergenic regions with distance to nearest CDS >= 16nt
+- Retrieve intergenic regions containing these transcripts
+- Run FragGeneScan on these intergenic regions to predict candidate CDS
+- Run cmsearch on these intergenic regions to annotate known RNA
+- We only consider transcripts that does not overlap with known RNAs and coding regions for downstream analysis
