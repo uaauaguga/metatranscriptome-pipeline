@@ -1,0 +1,6 @@
+indir: data/test-pe/fastq
+outdir: output/test-pe
+sample_ids: data/test-pe/mtx_ids.txt
+layout: paired
+profiling: true
+infer_strandness: true

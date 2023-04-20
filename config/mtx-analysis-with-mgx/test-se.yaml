@@ -1,0 +1,5 @@
+outdir: output/test-se
+sample_ids: data/test-pe/mtx_ids.txt
+mtx_to_mgx: data/test-pe/mtx2mgx.txt
+strandness: reverse 
+layout: single

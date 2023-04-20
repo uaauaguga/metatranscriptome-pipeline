@@ -1,0 +1,7 @@
+indir: data/test-pe/fastq
+outdir: output/test-pe
+sample_ids: data/test-pe/mgx_ids.txt
+layout: paired 
+gene_prediction: true
+gene_annotation: true
+rna_scanning: Rfam

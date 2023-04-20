@@ -1,0 +1,6 @@
+indir: data/test-se/fastq
+outdir: output/test-se
+sample_ids: data/test-se/mtx_ids.txt
+layout: single
+profiling: true
+infer_strandness: true

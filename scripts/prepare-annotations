@@ -1,0 +1,67 @@
+#!/bin/bash
+
+export PATH=~/qhsky1/miniconda/envs/bioinfo-env/bin:$PATH
+
+if [ ! $# -eq 2 ];then
+echo "this script accept exactly 2 parameters:"
+echo "usage: $0 dataset mgx_id" 
+exit 1;
+fi
+
+dataset=$1
+sample_id=$2
+indir=output/$dataset/annotation/$sample_id
+
+if [ ! -s $indir/metaprodigal.cds.pfam.gff ];then
+  echo "$indir/metaprodigal.cds.pfam.gff does not exists, exiting ."
+  exit 2
+fi
+
+if [ ! -s $indir/dust.interval ];then
+  echo "$indir/dust.interval does not exists, exiting ."
+  exit 3
+fi 
+
+
+echo "$(date) Process CDS annotation ..."
+scripts/gff2bed.py --gff $indir/metaprodigal.cds.pfam.gff --bed $indir/metaprodigal.cds.bed --name pfam_id --feature CDS
+
+
+echo "$(date) Dividing annotated CDS and unannotated CDS ..."
+cat $indir/metaprodigal.cds.bed | \
+awk -v prefix=$indir/metaprodigal.cds 'BEGIN{OFS="\t";FS="\t";}
+                                       $4!="None"{ path = prefix".pfam.bed";print $0 > path;next;}
+                                       {path = prefix".no.pfam.bed";print $1,$2,$3,".",".",$6 > path;}' 
+
+
+annotated_orf=$indir/metaprodigal.cds.pfam.bed
+unannotated_orf=$indir/metaprodigal.cds.no.pfam.bed
+
+
+echo "$(date) Get antisense intervals ..."
+annotated_orf_antisense=$indir/metaprodigal.cds.pfam.antisense.bed
+
+cat $annotated_orf | awk 'BEGIN{FS="\t";OFS="\t";}{if($6=="-"){$6="+"}else{$6="-";}print $1,$2,$3,$4,$5,$6}' > $annotated_orf_antisense
+
+unannotated_orf_antisense=$indir/metaprodigal.cds.no.pfam.antisense.bed
+
+cat $unannotated_orf | awk 'BEGIN{FS="\t";OFS="\t";}{if($6=="-"){$6="+"}else{$6="-";}print $1,$2,$3,$4,$5,$6}' > $unannotated_orf_antisense
+
+
+
+echo "$(date) Formatting low complexicity regions ..."
+
+[ -s output/$dataset/assembly/$sample_id/final.contigs.fa.fai ] || samtools faidx output/$dataset/assembly/$sample_id/final.contigs.fa
+cat $indir/dust.interval | \
+awk 'BEGIN{OFS="\t";}
+     $0~">"{seq_id=substr($1,2,length($1)-1);next;}
+     {print seq_id,$1,$3}' | \
+awk 'BEGIN{OFS="\t";FS="\t";}
+     {print $0,".",".","+";
+      print $0,".",".","-";}' | bedtools sort -faidx output/$dataset/assembly/$sample_id/final.contigs.fa.fai -i - > $indir/dust.bed
+
+echo "$(date) All done ."
+
+
+
+

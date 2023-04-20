@@ -1,0 +1,6 @@
+indir: data/test-pe/fastq
+outdir: output/test-se
+sample_ids: data/test-pe/mgx_ids.txt
+layout: single
+gene_prediction: true
+gene_annotation: true
